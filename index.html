@@ -211,6 +211,7 @@
             <div class="options">
                 <label>甜度：
                     <select id="sugar">
+                        <option value="">-- 請選擇 --</option>
                         <option value="正常糖">正常糖</option>
                         <option value="七分糖">七分糖</option>
                         <option value="半糖">半糖</option>
@@ -220,6 +221,7 @@
                 </label>
                 <label style="margin-left: 10px;">冰塊：
                     <select id="ice">
+                        <option value="">-- 請選擇 --</option>
                         <option value="正常冰">正常冰</option>
                         <option value="少冰">少冰</option>
                         <option value="微冰">微冰</option>
@@ -240,6 +242,18 @@
         const checkboxes = document.querySelectorAll('input[type="checkbox"]');
         const selectedList = document.getElementById('selected-list');
 
+        // 限制一次只能勾選一杯飲料
+        checkboxes.forEach(cb => {
+            cb.addEventListener('change', function() {
+                if (this.checked) {
+                    checkboxes.forEach(other => {
+                        if (other !== this) other.checked = false;
+                    });
+                }
+                updateOrder();
+            });
+        });
+
         function updateOrder() {
             selectedList.innerHTML = '';
             let count = 0;
@@ -248,7 +262,6 @@
                 if (cb.checked) {
                     count++;
                     const li = document.createElement('li');
-                    // 移除了金額顯示，只顯示飲料名稱
                     li.innerHTML = `<span>${cb.value}</span>`;
                     selectedList.appendChild(li);
                 }
@@ -259,56 +272,62 @@
             }
         }
 
-        checkboxes.forEach(cb => {
-            cb.addEventListener('change', updateOrder);
-        });
         function submitOrder() {
             const checkboxes = document.querySelectorAll('input[type="checkbox"]');
             const selected = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
             
-            // 抓取姓名
             const nameSelect = document.getElementById('customerName');
             const customerName = nameSelect.value;
+            const sugar = document.getElementById('sugar').value;
+            const ice = document.getElementById('ice').value;
             
-            // 檢查姓名是否已選擇
+            // 1. 檢查姓名
             if (!customerName) {
                 alert('請先選擇您的姓名！');
                 return;
             }
             
-            // 檢查是否已選擇飲料
+            // 2. 檢查飲料
             if (selected.length === 0) {
                 alert('請至少選擇一杯飲料！');
                 return;
             }
             
-            const sugar = document.getElementById('sugar').value;
-            const ice = document.getElementById('ice').value;
-            const note = ""; 
+            // 3. 檢查甜度 (必選)
+            if (!sugar) {
+                alert('請選擇甜度！');
+                return;
+            }
+            
+            // 4. 檢查冰塊 (必選)
+            if (!ice) {
+                alert('請選擇冰塊！');
+                return;
+            }
 
-            // 準備要傳送的資料
+            // 準備傳送的資料 (移除 quantity 和 note)
             const orderData = {
                 customerName: customerName,
                 drinks: selected.join(', '), 
                 sugar: sugar,
-                ice: ice,
-                quantity: selected.length,
-                note: note
+                ice: ice
             };
 
-            // ⭐ 1. 先改變按鈕狀態，達到「秒點秒回」的視覺效果
+            // 即時反饋
             const submitBtn = document.querySelector('.btn-submit');
             const originalBtnText = submitBtn.textContent;
             submitBtn.textContent = '✅ 訂單已送出！';
-            submitBtn.style.backgroundColor = '#4caf50'; 
-            submitBtn.disabled = true; // 防止使用者連點
+            submitBtn.style.backgroundColor = '#4caf50';
+            submitBtn.disabled = true;
 
-            // ⭐ 2. 同時清空畫面，讓使用者感覺已經完成
+            // 清空畫面 (包含甜度與冰塊重設為空值)
             checkboxes.forEach(cb => cb.checked = false);
             nameSelect.value = ''; 
+            document.getElementById('sugar').value = '';
+            document.getElementById('ice').value = '';
             updateOrder();
 
-            // ⭐ 3. 背景發送資料到 Google 試算表 (不等待回應)
+            // 背景發送
             fetch(API_URL, {
                 method: 'POST',
                 mode: 'no-cors',
@@ -316,13 +335,11 @@
                 body: JSON.stringify(orderData)
             })
             .catch(error => {
-                // 如果發送失敗，才提示使用者
                 console.error('Error:', error);
                 submitBtn.textContent = '❌ 送出失敗，請重試';
                 submitBtn.style.backgroundColor = '#d32f2f';
             })
             .finally(() => {
-                // ⭐ 4. 1.5秒後恢復按鈕原狀
                 setTimeout(() => {
                     submitBtn.textContent = originalBtnText;
                     submitBtn.style.backgroundColor = '#2e7d32';
