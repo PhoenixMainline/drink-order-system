@@ -310,9 +310,9 @@
                 customerName: customerName,
                 drinks: selected.join(', '), 
                 sugar: sugar,
-                ice: ice
+                ice: ice,
+                quantity: 1 // 固定為 1
             };
-
             // 即時反饋
             const submitBtn = document.querySelector('.btn-submit');
             const originalBtnText = submitBtn.textContent;
