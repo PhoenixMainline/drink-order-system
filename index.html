@@ -17,7 +17,7 @@
         .order-panel h2 { color: #2e7d32; border-bottom: 2px solid #81c784; padding-bottom: 10px; }
         #selected-list { list-style: none; padding: 0; margin: 0 0 20px 0; }
         #selected-list li { padding: 8px 0; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; }
-        .btn-submit { width: 100%; padding: 12px; background-color: #2e7d32; color: white; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; margin-top: 15px; }
+        .btn-submit { width: 100%; padding: 12px; background-color: #2e7d32; color: white; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; margin-top: 15px; transition: background-color 0.3s; }
         .btn-submit:hover { background-color: #1b5e20; }
         .options { margin-top: 10px; font-size: 14px; }
         .options select { padding: 5px; margin-left: 5px; }
@@ -184,7 +184,7 @@
             <!-- 姓名選擇 -->
             <div class="name-section">
                 <label for="customerName"><strong>請選擇您的姓名：</strong></label>
-                               <select id="customerName">
+                <select id="customerName">
                     <option value="">-- 請選擇 --</option>
                     <option value="阿公">阿公</option>
                     <option value="阿嬤">阿嬤</option>
@@ -235,7 +235,7 @@
 
     <script>
         // ⚠️ 請確認這裡填入的是您剛剛部署的 GAS 網址
-        const API_URL = 'https://script.google.com/macros/s/AKfycbwq51PkuZWN6Vb--pY3GG9J4hsl4RfhmLPoYEWTXXqmwbwa9A-VTOcJq6E_SzF1so6p/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycby7qRm3MnXXa2o45UhUK_AHB_QWhBNODIgC5f4T_2FhM2yVtE8jZstkSKUXaLkzLEpZ/exec';
         
         const checkboxes = document.querySelectorAll('input[type="checkbox"]');
         const selectedList = document.getElementById('selected-list');
@@ -271,7 +271,7 @@
             const nameSelect = document.getElementById('customerName');
             const customerName = nameSelect.value;
             
-            // 檢查姓名是否已選擇
+            // 檢查姓名是否已選擇 (保留 alert 提醒，因為這是必要檢查)
             if (!customerName) {
                 alert('請先選擇您的姓名！');
                 return;
@@ -285,7 +285,7 @@
             
             const sugar = document.getElementById('sugar').value;
             const ice = document.getElementById('ice').value;
-            const note = ""; // 備註欄位保留空白
+            const note = ""; 
 
             // 準備要傳送的資料
             const orderData = {
@@ -297,7 +297,13 @@
                 note: note
             };
 
-            // 使用 fetch 將資料 POST 到 Google 試算表
+            // 1. 即時反饋：改變按鈕文字，並顯示提示
+            const submitBtn = document.querySelector('.btn-submit');
+            const originalBtnText = submitBtn.textContent;
+            submitBtn.textContent = '✅ 訂單已送出！';
+            submitBtn.style.backgroundColor = '#4caf50'; // 變成淺綠色
+
+            // 2. 發送資料到 Google 試算表 (背景執行，不卡住畫面)
             fetch(API_URL, {
                 method: 'POST',
                 mode: 'no-cors',
@@ -305,15 +311,25 @@
                 body: JSON.stringify(orderData)
             })
             .then(response => {
-                alert(`🎉 ${customerName} 您好，訂單已送出！感謝您的訂購。`);
-                // 清空所有勾選
+                // 3. 成功後，清空所有勾選與姓名
                 checkboxes.forEach(cb => cb.checked = false);
-                // 清空姓名選擇
                 nameSelect.value = ''; 
                 updateOrder();
+
+                // 4. 2秒後恢復按鈕原狀
+                setTimeout(() => {
+                    submitBtn.textContent = originalBtnText;
+                    submitBtn.style.backgroundColor = '#2e7d32'; // 恢復深綠色
+                }, 2000);
             })
             .catch(error => {
-                alert('❌ 訂單送出失敗，請稍後再試。');
+                // 如果失敗，恢復按鈕並提示
+                submitBtn.textContent = '❌ 送出失敗，請重試';
+                submitBtn.style.backgroundColor = '#d32f2f'; // 變成紅色
+                setTimeout(() => {
+                    submitBtn.textContent = originalBtnText;
+                    submitBtn.style.backgroundColor = '#2e7d32';
+                }, 2000);
                 console.error('Error:', error);
             });
         }
