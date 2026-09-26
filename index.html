@@ -27,7 +27,7 @@
 </head>
 <body>
 
-    <h1>🥤 清心福全飲料 - 線上點選系統</h1>
+    <h1>🥤清心福全飲料 - 線上點選系統</h1>
     
     <div class="container">
         <!-- 左側菜單 -->
@@ -198,11 +198,10 @@
                     <option value="以絜">以絜</option>
                     <option value="德昌">德昌</option>
                     <option value="舒甯">舒甯</option>
-                    <option value="小姑姑/阿姨">小姑姑/阿姨</option>
+                     <option value="小姑姑/阿姨">小姑姑/阿姨</option>
                     <option value="小博">小博</option>
                     <option value="希瓜">希瓜</option>
-                 
-                </select>
+            </select>
             </div>
 
             <ul id="selected-list">
@@ -233,13 +232,27 @@
             </div>
 
             <button class="btn-submit" onclick="submitOrder()">確認送出訂單</button>
+            
+            <!-- 未點餐名單 -->
+            <div style="margin-top: 20px; padding: 10px; background-color: #fff3e0; border-radius: 5px; border-left: 4px solid #ff9800;">
+                <h3 style="margin: 0 0 10px 0; color: #e65100; font-size: 16px;">⏳ 尚未點餐的名單</h3>
+                <div id="notOrderedList" style="font-size: 14px; color: #555; line-height: 1.8;">
+                    載入中...
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
         // ⚠️ 請確認這裡填入的是您剛剛部署的 GAS 網址
-        const API_URL = 'https://script.google.com/macros/s/AKfycbyOtfSCXwq05rJsAgTF1sgo_IpZxdUONcSbVGHLjqMoOgfY30kiMzis33cpHJ-_z_yw/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbwboV6J0cgc2GzaTkcczIGBF5rpyMm6nyqMJrVoro6gKgQXw7_fozG8ExV2uLjDKSXe/exec';
         
+        // 完整姓名清單（用於比對）
+        const ALL_NAMES = [
+            "阿公", "阿嬤", "美華", "姊夫", "婷婷", "柔柔", "德勝", 
+            "大嫂", "以芯", "以絜", "德昌", "舒甯", "小博", "希瓜", "小姑姑/阿姨"
+        ];
+
         const checkboxes = document.querySelectorAll('input[type="checkbox"]');
         const selectedList = document.getElementById('selected-list');
 
@@ -322,7 +335,7 @@
             submitBtn.style.backgroundColor = '#4caf50';
             submitBtn.disabled = true;
 
-            // 清空畫面 (包含甜度與冰塊重設為空值)
+            // 清空畫面
             checkboxes.forEach(cb => cb.checked = false);
             nameSelect.value = ''; 
             document.getElementById('sugar').value = '';
@@ -347,8 +360,38 @@
                     submitBtn.style.backgroundColor = '#2e7d32';
                     submitBtn.disabled = false;
                 }, 1500);
+                // 送出後重新整理未點餐名單
+                checkNotOrdered();
             });
         }
+
+        // 檢查誰還沒點餐
+        function checkNotOrdered() {
+            fetch(API_URL, { method: 'GET' })
+                .then(response => response.json())
+                .then(orderedNames => {
+                    // 找出還沒點餐的人
+                    const notOrdered = ALL_NAMES.filter(name => !orderedNames.includes(name));
+                    
+                    const container = document.getElementById('notOrderedList');
+                    if (notOrdered.length === 0) {
+                        container.innerHTML = '<span style="color: #2e7d32; font-weight: bold;">🎉 所有人都點餐完畢！</span>';
+                    } else {
+                        container.innerHTML = notOrdered.map(name => 
+                            `<span style="display: inline-block; background: #ffcc80; padding: 2px 8px; border-radius: 10px; margin: 2px;">${name}</span>`
+                        ).join('');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('notOrderedList').innerHTML = '無法載入名單，請稍後再試。';
+                });
+        }
+
+        // 網頁載入時自動檢查一次
+        window.onload = function() {
+            checkNotOrdered();
+        };
     </script>
 </body>
 </html>
