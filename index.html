@@ -262,7 +262,6 @@
         checkboxes.forEach(cb => {
             cb.addEventListener('change', updateOrder);
         });
-
         function submitOrder() {
             const checkboxes = document.querySelectorAll('input[type="checkbox"]');
             const selected = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
@@ -271,7 +270,7 @@
             const nameSelect = document.getElementById('customerName');
             const customerName = nameSelect.value;
             
-            // 檢查姓名是否已選擇 (保留 alert 提醒，因為這是必要檢查)
+            // 檢查姓名是否已選擇
             if (!customerName) {
                 alert('請先選擇您的姓名！');
                 return;
@@ -297,40 +296,38 @@
                 note: note
             };
 
-            // 1. 即時反饋：改變按鈕文字，並顯示提示
+            // ⭐ 1. 先改變按鈕狀態，達到「秒點秒回」的視覺效果
             const submitBtn = document.querySelector('.btn-submit');
             const originalBtnText = submitBtn.textContent;
             submitBtn.textContent = '✅ 訂單已送出！';
-            submitBtn.style.backgroundColor = '#4caf50'; // 變成淺綠色
+            submitBtn.style.backgroundColor = '#4caf50'; 
+            submitBtn.disabled = true; // 防止使用者連點
 
-            // 2. 發送資料到 Google 試算表 (背景執行，不卡住畫面)
+            // ⭐ 2. 同時清空畫面，讓使用者感覺已經完成
+            checkboxes.forEach(cb => cb.checked = false);
+            nameSelect.value = ''; 
+            updateOrder();
+
+            // ⭐ 3. 背景發送資料到 Google 試算表 (不等待回應)
             fetch(API_URL, {
                 method: 'POST',
                 mode: 'no-cors',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(orderData)
             })
-            .then(response => {
-                // 3. 成功後，清空所有勾選與姓名
-                checkboxes.forEach(cb => cb.checked = false);
-                nameSelect.value = ''; 
-                updateOrder();
-
-                // 4. 2秒後恢復按鈕原狀
-                setTimeout(() => {
-                    submitBtn.textContent = originalBtnText;
-                    submitBtn.style.backgroundColor = '#2e7d32'; // 恢復深綠色
-                }, 2000);
-            })
             .catch(error => {
-                // 如果失敗，恢復按鈕並提示
+                // 如果發送失敗，才提示使用者
+                console.error('Error:', error);
                 submitBtn.textContent = '❌ 送出失敗，請重試';
-                submitBtn.style.backgroundColor = '#d32f2f'; // 變成紅色
+                submitBtn.style.backgroundColor = '#d32f2f';
+            })
+            .finally(() => {
+                // ⭐ 4. 1.5秒後恢復按鈕原狀
                 setTimeout(() => {
                     submitBtn.textContent = originalBtnText;
                     submitBtn.style.backgroundColor = '#2e7d32';
-                }, 2000);
-                console.error('Error:', error);
+                    submitBtn.disabled = false;
+                }, 1500);
             });
         }
     </script>
