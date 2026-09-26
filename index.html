@@ -1,3 +1,16 @@
+為您將整份 HTML 程式碼進行最終的完美整合與修正。
+
+這次的版本包含以下所有功能：
+1. **標題**：已加上「中秋烤肉」。
+2. **姓名清單**：已更新為您提供的最新名單。
+3. **四項必選**：姓名、飲料、甜度、冰塊，只要有一項沒選就無法送出。
+4. **即點即回**：送出按鈕瞬間變色，背景發送不卡頓。
+5. **無金額欄位**：畫面與程式碼都不再顯示或計算金額。
+6. **API 網址更新**：已換上您最新提供的 `https://script.google.com/macros/s/AKfycbyOtfSCXwq05rJsAgTF1sgo_IpZxdUONcSbVGHLjqMoOgfY30kiMzis33cpHJ-_z_yw/exec`。
+
+請直接將以下整段程式碼**全部複製**，取代您 GitHub 上的 `index.html` 內容：
+
+```html
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -201,7 +214,8 @@
                     <option value="小姑姑/阿姨">小姑姑/阿姨</option>
                     <option value="小博">小博</option>
                     <option value="希瓜">希瓜</option>
-            </select>
+                 
+                </select>
             </div>
 
             <ul id="selected-list">
@@ -237,7 +251,7 @@
 
     <script>
         // ⚠️ 請確認這裡填入的是您剛剛部署的 GAS 網址
-        const API_URL = 'https://script.google.com/macros/s/AKfycby7qRm3MnXXa2o45UhUK_AHB_QWhBNODIgC5f4T_2FhM2yVtE8jZstkSKUXaLkzLEpZ/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbyOtfSCXwq05rJsAgTF1sgo_IpZxdUONcSbVGHLjqMoOgfY30kiMzis33cpHJ-_z_yw/exec';
         
         const checkboxes = document.querySelectorAll('input[type="checkbox"]');
         const selectedList = document.getElementById('selected-list');
@@ -305,7 +319,7 @@
                 return;
             }
 
-            // 準備傳送的資料 (移除 quantity 和 note)
+            // 準備傳送的資料
             const orderData = {
                 customerName: customerName,
                 drinks: selected.join(', '), 
@@ -313,6 +327,7 @@
                 ice: ice,
                 quantity: 1 // 固定為 1
             };
+
             // 即時反饋
             const submitBtn = document.querySelector('.btn-submit');
             const originalBtnText = submitBtn.textContent;
@@ -350,3 +365,4 @@
     </script>
 </body>
 </html>
+```
