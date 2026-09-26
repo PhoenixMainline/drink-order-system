@@ -184,7 +184,7 @@
             <!-- 姓名選擇 -->
             <div class="name-section">
                 <label for="customerName"><strong>請選擇您的姓名：</strong></label>
-                <select id="customerName">
+               <select id="customerName">
                     <option value="">-- 請選擇 --</option>
                     <option value="阿公">阿公</option>
                     <option value="阿嬤">阿嬤</option>
@@ -201,7 +201,6 @@
                     <option value="小姑姑(阿姨)">小姑姑(阿姨)</option>
                     <option value="小博">小博</option>
                     <option value="芮希">芮希</option>
-                  
                 </select>
             </div>
 
@@ -248,12 +247,10 @@
         // ⚠️ 請確認這裡填入的是您剛剛部署的 GAS 網址
         const API_URL = 'https://script.google.com/macros/s/AKfycbwboV6J0cgc2GzaTkcczIGBF5rpyMm6nyqMJrVoro6gKgQXw7_fozG8ExV2uLjDKSXe/exec';
         
-        // 完整姓名清單（用於比對，必須與下拉選單完全一致）
-        const ALL_NAMES = [
+              const ALL_NAMES = [
             "阿公", "阿嬤", "美華", "姊夫", "婷婷", "柔柔", "德勝", 
             "大嫂", "以芯", "以絜", "德昌", "舒甯", "小姑姑(阿姨)", "小博", "芮希"
         ];
-
         const checkboxes = document.querySelectorAll('input[type="checkbox"]');
         const selectedList = document.getElementById('selected-list');
 
