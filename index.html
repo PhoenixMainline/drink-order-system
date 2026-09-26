@@ -17,7 +17,6 @@
         .order-panel h2 { color: #2e7d32; border-bottom: 2px solid #81c784; padding-bottom: 10px; }
         #selected-list { list-style: none; padding: 0; margin: 0 0 20px 0; }
         #selected-list li { padding: 8px 0; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; }
-        .total-price { font-size: 24px; font-weight: bold; color: #d32f2f; text-align: right; margin-top: 10px; }
         .btn-submit { width: 100%; padding: 12px; background-color: #2e7d32; color: white; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; margin-top: 15px; }
         .btn-submit:hover { background-color: #1b5e20; }
         .options { margin-top: 10px; font-size: 14px; }
@@ -33,7 +32,6 @@
     <div class="container">
         <!-- 左側菜單 -->
         <div id="menu-area">
-            <!-- ... 菜單內容保持不變 ... -->
             <div class="menu-section">
                 <h2>01 茗品系列</h2>
                 <div class="drink-item"><input type="checkbox" id="d1" value="烏龍綠茶(翡翠烏龍)"><label for="d1">烏龍綠茶(翡翠烏龍)</label></div>
@@ -183,26 +181,26 @@
         <div class="order-panel">
             <h2>🛒 您的點餐明細</h2>
 
-            <!-- 新增：姓名選擇 -->
+            <!-- 姓名選擇 -->
             <div class="name-section">
                 <label for="customerName"><strong>請選擇您的姓名：</strong></label>
-                <select id="customerName">
+                               <select id="customerName">
                     <option value="">-- 請選擇 --</option>
-                    <option value="林清水">林清水</option>
-                    <option value="莊玉梅">莊玉梅</option>
-                    <option value="林美華">林美華</option>
+                    <option value="阿公">阿公</option>
+                    <option value="阿嬤">阿嬤</option>
+                    <option value="美華">美華</option>
                     <option value="姊夫">姊夫</option>
                     <option value="婷婷">婷婷</option>
                     <option value="柔柔">柔柔</option>
-                    <option value="林德勝">林德勝</option>
+                    <option value="德勝">德勝</option>
                     <option value="大嫂">大嫂</option>
                     <option value="以芯">以芯</option>
                     <option value="以絜">以絜</option>
-                    <option value="林德昌">林德昌</option>
+                    <option value="德昌">德昌</option>
                     <option value="舒甯">舒甯</option>
                     <option value="小博">小博</option>
                     <option value="希瓜">希瓜</option>
-                    <option value="林美蓉">林美蓉</option>
+                    <option value="小姑姑/阿姨">小姑姑/阿姨</option>
                 </select>
             </div>
 
@@ -231,7 +229,6 @@
                 </label>
             </div>
 
-            <div class="total-price">總計：<span id="total">0</span> 元</div>
             <button class="btn-submit" onclick="submitOrder()">確認送出訂單</button>
         </div>
     </div>
@@ -240,23 +237,19 @@
         // ⚠️ 請確認這裡填入的是您剛剛部署的 GAS 網址
         const API_URL = 'https://script.google.com/macros/s/AKfycbwq51PkuZWN6Vb--pY3GG9J4hsl4RfhmLPoYEWTXXqmwbwa9A-VTOcJq6E_SzF1so6p/exec';
         
-        // 假設每杯飲料均一價 30 元 (可自行修改)
-        const PRICE_PER_DRINK = 30;
         const checkboxes = document.querySelectorAll('input[type="checkbox"]');
         const selectedList = document.getElementById('selected-list');
-        const totalSpan = document.getElementById('total');
 
         function updateOrder() {
             selectedList.innerHTML = '';
-            let total = 0;
             let count = 0;
 
             checkboxes.forEach(cb => {
                 if (cb.checked) {
                     count++;
-                    total += PRICE_PER_DRINK;
                     const li = document.createElement('li');
-                    li.innerHTML = `<span>${cb.value}</span><span>$${PRICE_PER_DRINK}</span>`;
+                    // 移除了金額顯示，只顯示飲料名稱
+                    li.innerHTML = `<span>${cb.value}</span>`;
                     selectedList.appendChild(li);
                 }
             });
@@ -264,7 +257,6 @@
             if (count === 0) {
                 selectedList.innerHTML = '<li style="color: #999; justify-content: center;">尚未選擇飲料</li>';
             }
-            totalSpan.textContent = total;
         }
 
         checkboxes.forEach(cb => {
@@ -293,7 +285,7 @@
             
             const sugar = document.getElementById('sugar').value;
             const ice = document.getElementById('ice').value;
-            const note = ""; // 如果您有做備註欄位，可以從 input 抓取
+            const note = ""; // 備註欄位保留空白
 
             // 準備要傳送的資料
             const orderData = {
@@ -316,7 +308,7 @@
                 alert(`🎉 ${customerName} 您好，訂單已送出！感謝您的訂購。`);
                 // 清空所有勾選
                 checkboxes.forEach(cb => cb.checked = false);
-                // 清空姓名選擇 (可選，若要保留可註解掉)
+                // 清空姓名選擇
                 nameSelect.value = ''; 
                 updateOrder();
             })
